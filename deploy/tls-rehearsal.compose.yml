@@ -1,7 +1,7 @@
 # CI-only localhost HTTPS ingress; generated certs are never committed.
 services:
   gateway:
-    image: nginx:1.27-alpine
+    image: nginxinc/nginx-unprivileged:stable-alpine
     depends_on:
       api:
         condition: service_healthy
