@@ -5,7 +5,9 @@ import time
 import logging
 from typing import Literal
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, Depends, Request, Header
+from fastapi.responses import HTMLResponse, Response
 from pydantic import BaseModel, Field, model_validator
 from app.core import workflow_offline, load_companies
 from app.security import principal, require_owner, validate_security_config
@@ -94,6 +96,33 @@ def active_graph():
     if app.state.graph is None:
         raise HTTPException(503, "LangGraph unavailable")
     return app.state.graph
+
+def _local_demo_only(request: Request):
+    if (os.getenv("APP_ENV", "development") != "development"
+            or request.client is None
+            or request.client.host not in ("127.0.0.1", "::1", "testclient")):
+        raise HTTPException(404, "Not found")
+
+@app.get("/demo", response_class=HTMLResponse, include_in_schema=False)
+def demo_ui(request: Request):
+    """Local-only reviewer interface; no auth bypass or token storage."""
+    _local_demo_only(request)
+    return HTMLResponse(
+        (Path(__file__).resolve().parent / "demo_ui.html").read_text(encoding="utf-8"),
+        headers={"Cache-Control": "no-store",
+                 "Content-Security-Policy":
+                 "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; "
+                 "connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; "
+                 "form-action 'none'; img-src 'none'; object-src 'none'",
+                 "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer"})
+
+@app.get("/demo/app.js", include_in_schema=False)
+def demo_js(request: Request):
+    _local_demo_only(request)
+    return Response(
+        (Path(__file__).resolve().parent / "demo.js").read_text(encoding="utf-8"),
+        media_type="application/javascript",
+        headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
 @app.get("/health")
 def health():

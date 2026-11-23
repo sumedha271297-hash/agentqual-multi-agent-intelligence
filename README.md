@@ -39,6 +39,26 @@ A localhost-only rehearsal configuration is provided at [deploy/staging.compose.
 
 See [evaluation methodology v2](docs/evaluation_v2.md), [demo instructions](docs/demo.md), [staging plan](docs/staging.md), and [ADR 0003](docs/adr/0003-constrained-qualification-reasoning.md).
 
+## Local reviewer demo, adversarial checks and load smoke
+
+The local browser interface at **http://127.0.0.1:8000/demo** works with
+`uvicorn app.api:app --host 127.0.0.1 --port 8000`. It executes the
+actual FastAPI + LangGraph request paths on fictional data. Click Run,
+Inspect, and Approve/Reject. It does not store keys in browser storage,
+is not available in `APP_ENV=production`, and is restricted to loopback
+clients. Never expose the development application to the public internet.
+
+`python -m scripts.security_matrix` runs six mocked adversarial policy
+exercises. `python -m scripts.performance_smoke` measures 80 concurrent
+in-process HTTP requests (8 workers) and records p50/p95 latency,
+observed throughput, and failures. They are automated in CI with
+per-run reports. **Neither is a real-model jailbreak benchmark or a
+staging/production capacity test.**
+
+See [security and performance methodology](docs/security_performance.md).
+An actual screen-recorded walkthrough and independently validated
+real-provider factuality assessment are still outstanding.
+
 ## Running locally
 
 ```bash

@@ -33,6 +33,8 @@ jobs:
       - run: python -m scripts.evaluate_rubric
       - run: python -m scripts.evaluate_v2
       - run: python -m scripts.demo
+      - run: python -m scripts.security_matrix
+      - run: python -m scripts.performance_smoke
       - uses: actions/upload-artifact@v4
         if: success()
         with:
@@ -40,4 +42,6 @@ jobs:
           path: |
             reports/demo_trace.json
             reports/eval_v2.json
+            reports/security_matrix.json
+            reports/performance_smoke.json
           retention-days: 14

@@ -68,7 +68,7 @@ def outreach_agent(state: AgentState):
                 draft = generate_llm_draft(state["evidence"])
         else:
             draft = generate_recommendation(Company(**state["evidence"]), state["qualification"])
-        if not validate_draft(draft):
+        if draft is None or not validate_draft(draft):
             raise ValueError("Invalid draft schema")
         return {"draft": draft, "route": "approval", "sent": False}
     except (ValueError, RuntimeError, TimeoutError, ConnectionError, ImportError) as exc:
