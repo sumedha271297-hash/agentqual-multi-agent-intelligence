@@ -3,6 +3,7 @@ import os
 import uuid
 import time
 import logging
+from typing import Literal
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, Request
 from pydantic import BaseModel, Field, model_validator
@@ -75,6 +76,7 @@ class RunRequest(BaseModel):
     company_id: str
     icp: ICP
     llm_enabled: bool = False
+    llm_provider: Literal['openai', 'gemini'] = 'openai'
 
 class ApprovalRequest(BaseModel):
     approved: bool
@@ -109,14 +111,17 @@ def graph_run(request: RunRequest, tenant_id: str = Depends(principal)):
     graph = active_graph()
     if request.company_id not in load_companies():
         raise HTTPException(404, "Unknown company")
-    if request.llm_enabled and not os.getenv("OPENAI_API_KEY"):
-        raise HTTPException(422, "OPENAI_API_KEY required for LLM mode")
+    if request.llm_enabled:
+        required = "GEMINI_API_KEY" if request.llm_provider == "gemini" else "OPENAI_API_KEY"
+        if not os.getenv(required):
+            raise HTTPException(422, f"{required} required for LLM mode")
     thread_id = str(uuid.uuid4())
     config = {"configurable": {"thread_id": thread_id}}
     state = graph.invoke({"company_id": request.company_id,
                           "tenant_id": tenant_id,
                           "icp": request.icp.model_dump(),
                           "llm_enabled": request.llm_enabled,
+                          "llm_provider": request.llm_provider,
                           "approved": False, "sent": False}, config=config)
     snapshot = graph.get_state(config)
     return {"thread_id": thread_id, "state": state,

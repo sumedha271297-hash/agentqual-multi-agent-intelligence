@@ -10,6 +10,7 @@ class AgentState(TypedDict, total=False):
     tenant_id: str
     icp: dict
     llm_enabled: bool
+    llm_provider: str
     evidence: dict
     tool_metadata: dict
     qualification: dict
@@ -42,7 +43,11 @@ def outreach_agent(state: AgentState):
     try:
         if state.get("llm_enabled", False):
             from app.llm import generate_llm_draft
-            draft = generate_llm_draft(state["evidence"])
+            if state.get("llm_provider", "openai") == "gemini":
+                from app.gemini import generate_gemini_draft
+                draft = generate_gemini_draft(state["evidence"])
+            else:
+                draft = generate_llm_draft(state["evidence"])
         else:
             draft = generate_recommendation(Company(**state["evidence"]), state["qualification"])
         if not validate_draft(draft):

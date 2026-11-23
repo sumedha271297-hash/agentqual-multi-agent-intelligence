@@ -8,7 +8,7 @@ AgentQual is an intentionally bounded AI workflow showing how to build and test 
 
 - **LangGraph**: research → ICP qualification → conditional routing → outreach draft → human approval interrupt.
 - **Local research tool**: synthetic company lookup with bounded retry, typed record validation, and fail-closed routing.
-- **Two execution modes**: deterministic offline baseline (no key required); optional OpenAI-backed structured draft generation with `OPENAI_API_KEY` and `llm_enabled: true`.
+- **Three execution modes**: deterministic offline baseline (no key required); optional OpenAI and Gemini structured draft generation with the corresponding API key, `llm_enabled: true`, and `llm_provider` set to `openai` or `gemini`.
 - **Persistent state**: `PostgresSaver` with `DATABASE_URL`; in-memory saver for local development only.
 - **REST API**: FastAPI run, inspect checkpoint, and approve/reject; no outbound email capability.
 - **Tests**: unit, API, mocked LLM, LangGraph interrupt/resume, and PostgreSQL saver reopening.
@@ -52,7 +52,7 @@ cp .env.example .env
 docker compose --env-file .env up --build
 ```
 
-**Do not expose this demo publicly.** Its API is unauthenticated and lacks tenant isolation and thread authorization. PostgreSQL persistence is a demonstrated architecture and must be verified by CI before claiming a successful tested integration.
+**Do not expose this demo publicly.** Basic API-key tenant isolation is present, but it lacks other production controls. PostgreSQL persistence is a demonstrated architecture and must be verified by CI before claiming a successful tested integration.
 
 ## Evaluation
 
@@ -71,3 +71,7 @@ See [evaluation methodology](docs/evaluation_methodology.md) and [operations and
 - [Demo recording outline](docs/demo_script.md)
 
 The realistic next steps are permissioned research API integration, measured LLM factuality, independently annotated holdout data, authentication and authorization, distributed observability, cloud deployment, and a recorded demonstration. No such results are claimed here.
+
+## Gemini setup
+
+[Gemini provider setup](docs/gemini_setup.md) explains optional free-tier access, API key handling, and the explicitly gated live evaluation script. No live provider calls run in CI.
