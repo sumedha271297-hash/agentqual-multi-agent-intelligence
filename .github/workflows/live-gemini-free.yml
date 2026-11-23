@@ -1,0 +1,63 @@
+name: Manual Free-Tier Gemini Smoke Evaluation
+
+# Explicit opt-in only; no calls on push or pull request.
+# This workflow CANNOT verify a Google project's billing tier. The user must
+# verify in Google AI Studio that their selected project is on the Free tier.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type RUN_GEMINI_FREE to confirm your Google AI Studio project is on the Free tier'
+        required: true
+        type: string
+      cases:
+        description: 'Synthetic companies to check (start with 1)'
+        required: true
+        default: '1'
+        type: choice
+        options:
+          - '1'
+          - '2'
+          - '3'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentqual-free-gemini-smoke
+  cancel-in-progress: false
+
+jobs:
+  free-tier-gemini-smoke:
+    if: ${{ inputs.confirmation == 'RUN_GEMINI_FREE' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: gemini-2.5-flash-lite
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Confirm Gemini credential is present without printing it
+        shell: bash
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::Missing GEMINI_API_KEY Actions secret. Add a Google AI Studio free-tier project key in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install app
+        run: pip install -r requirements-dev.txt
+      - name: Make only explicitly requested calls to the fictional company records
+        run: python -m scripts.evaluate_live --provider gemini --allow-provider-calls --max-cases "${{ inputs.cases }}"
+      - name: Upload numeric, redacted schema/latency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentqual-gemini-free-tier-smoke
+          path: reports/live_provider_evaluation.json
+          if-no-files-found: ignore
+          retention-days: 7
