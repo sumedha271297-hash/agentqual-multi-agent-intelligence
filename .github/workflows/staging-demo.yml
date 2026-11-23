@@ -40,6 +40,8 @@ jobs:
             -keyout deploy/tls/server.key -out deploy/tls/server.crt \
             -subj "/CN=localhost" \
             -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+          # Disposable CI certificate only: image runs without DAC override.
+          chmod 644 deploy/tls/server.key deploy/tls/server.crt
       - name: Build API, PostgreSQL and HTTPS ingress
         run: docker compose -f deploy/staging.compose.yml -f deploy/tls-rehearsal.compose.yml up -d --build --wait
       - name: Auth, tenancy and approval probes over real HTTP
