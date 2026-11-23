@@ -4,6 +4,14 @@
 
 AgentQual is an intentionally bounded AI workflow showing how to build and test auditable qualification decisions, tool execution, checkpointed human approval, and optional provider-backed drafting.
 
+## Start here — verified candidate package
+
+- **[Recruiter-facing case study + current architecture diagram](docs/PORTFOLIO_CASE_STUDY.md)**
+- **[Challenge-first engineering architecture review](docs/ARCHITECTURE_REVIEW.md)**
+- **[Interview defense guide and whiteboard exercises](docs/INTERVIEW_DEFENSE_GUIDE.md)**
+
+Latest confirmed baseline (commit `3aae87c1`): **82 tests passed** in [Python CI](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45243287837), and [Docker Compose staging plus genuine Chromium browser recording](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45243288064) passed. Recordings are workflow artifacts. This is **synthetic-data independent portfolio work**, not customer delivery, verified real LLM performance, or a public deployment.
+
 ## What is implemented
 
 - **LangGraph**: research → ICP qualification → conditional routing → outreach draft → human approval interrupt.
@@ -35,7 +43,7 @@ GitHub CI (commit `4ac10aa12ff5d03dfb666656ab3fc5ea90426aa2`) passed **75 automa
 
 Optional `agentic_qualification: true` enables schema-constrained model reasoning with QUALIFY, REJECT and REVIEW outcomes. A deterministic ICP policy vetoes unsupported QUALIFY judgments. This feature is tested with mocked model output, not live inference. It requires `OPENAI_API_KEY` when used for real calls.
 
-A localhost-only rehearsal configuration is provided at [deploy/staging.compose.yml](deploy/staging.compose.yml). It is **not a cloud deployment**, is unverified by a container runtime, and is not safe for internet exposure without additional controls.
+A localhost-only rehearsal configuration is provided at [deploy/staging.compose.yml](deploy/staging.compose.yml). It **was verified in GitHub Actions with actual Compose containers and PostgreSQL restart recovery**; it remains **not a cloud deployment** and is not safe for internet exposure without additional controls.
 
 See [evaluation methodology v2](docs/evaluation_v2.md), [demo instructions](docs/demo.md), [staging plan](docs/staging.md), and [ADR 0003](docs/adr/0003-constrained-qualification-reasoning.md).
 
@@ -56,8 +64,7 @@ per-run reports. **Neither is a real-model jailbreak benchmark or a
 staging/production capacity test.**
 
 See [security and performance methodology](docs/security_performance.md).
-An actual screen-recorded walkthrough and independently validated
-real-provider factuality assessment are still outstanding.
+A genuine local Chromium browser screen recording is available in the [verified Actions artifact](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45243288064). Independently validated live-provider factuality assessment is still outstanding.
 
 ## Running locally
 
@@ -113,7 +120,7 @@ See [evaluation methodology](docs/evaluation_methodology.md) and [operations and
 - [GitHub Actions workflow](.github/workflows/ci.yml)
 - [Demo recording outline](docs/demo_script.md)
 
-The realistic next steps are permissioned research API integration, measured LLM factuality, independently annotated holdout data, authentication and authorization, distributed observability, cloud deployment, and a recorded demonstration. No such results are claimed here.
+The realistic next steps are permissioned research API integration, measured LLM factuality, independently annotated holdout data, per-user authorization, distributed observability, and secure cloud deployment. A real local browser recording and ephemeral staging verification are already documented; no public deployment or live-model metrics are claimed.
 
 ## Gemini setup
 
