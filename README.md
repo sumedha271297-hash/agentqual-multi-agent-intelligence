@@ -19,7 +19,15 @@ Latest confirmed baseline (commit `3aae87c1`): **82 tests passed** in [Python CI
 - [Blinded independent-review packet and adjudication protocol](docs/INDEPENDENT_REVIEW_PROTOCOL.md). Code checks format and distinct reviewers; **no actual outside reviewer labels have been supplied or claimed**.
 - [Production-style localhost TLS, ingress rate limit and real Postgres backup/restore drills](docs/PRODUCTION_REHEARSAL.md). CI uses disposable secrets and a self-signed localhost certificate, not an actual private cloud.
 - [Unscored, hands-on technical interview assessment](docs/TECHNICAL_ASSESSMENT.md) with `python -m scripts.practice_defense`; the candidate must personally submit answers before anyone can claim the practice was completed.
-- Real-model evaluation remains manual, opt-in and credit-dependent. No live API metrics or independent human-label accuracy are claimed.
+- Real Gemini model evaluation succeeded: [3 of 3 synthetic drafts had valid schema](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45260671524), with two HTTP 503 recoveries. No independently reviewed factual accuracy is claimed. [Current canonical evidence ledger](docs/FINAL_EVIDENCE_STATUS.md).
+
+## Final verified snapshot (2026-11-24)
+
+- **102 automated tests passed**: [Python CI](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45261571202).
+- **Latest real staging/browser workflow passed**: [verification](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45261571293).
+- **Gemini 3.5 Flash-Lite real provider evaluation: 3/3 schema-valid drafts** on fictional company inputs, including recovery from two HTTP 503 provider errors: [run](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45260671524).
+- **Synthetic-only factuality and prompt-injection triage** with human review packet: [methodology](docs/FACTUALITY_EVALUATION.md). Do not describe heuristic flags as factuality accuracy.
+- **Remaining external evidence**: independent human labels, actual cloud hosting and genuine real-world customer outcomes are not established.
 
 ## What is implemented
 

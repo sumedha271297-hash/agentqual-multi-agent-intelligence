@@ -45,6 +45,8 @@ flowchart TD
 
 ## Reproducible evidence (verified on GitHub)
 
+**Updated 2026-11-24:** [Authoritative final evidence ledger](FINAL_EVIDENCE_STATUS.md). The latest confirmed core tests are **102 passing**, with successful [3/3 live Gemini structured draft calls](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45260671524) and [current staging/browser success](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45261571293). The older milestones in the table below are retained for historical traceability.
+
 | Verification | What it actually proves | Evidence |
 |---|---|---|
 | 82 passing automated tests | Code paths including routing, mocked model failures, security checks and persistence integration | [Python CI](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45243287837) |
@@ -66,14 +68,14 @@ The performance smoke test uses in-process HTTP clients and should **not** be ch
 
 ## Limitations and next validation gates
 
-1. **No verified live LLM outcome.** The OpenAI API secret and manual opt-in workflow exist, but billable provider evaluation has not succeeded. Factual grounding, token costs and real inference latency are unmeasured.
+1. **Live Gemini inference verified, factual accuracy unverified.** Real Gemini generated 3/3 schema-valid synthetic drafts (median 4.42 s with 503 retries), but independent human factuality, real-lead accuracy and token costs remain unmeasured.
 2. **Synthetic labels are not independent ground truth.** Company profiles overlap across development/holdout policies; future work needs permissioned samples and blinded reviewers.
 3. **No public cloud deployment.** The successfully verified staging environment is ephemeral Docker Compose on a GitHub runner, not a managed internet-facing service.
-4. **Access control is deliberately small.** Tenant API keys, no per-user roles, no rate limiting, no complete audit-trail retention or secrets lifecycle.
+4. **Access control is deliberately small.** Tenant API keys and an ephemeral localhost nginx rate-limiting rehearsal exist; there are no per-user roles, managed cloud rate-limit deployment, full audit-trail retention or production secrets lifecycle.
 5. **No autonomous end-to-end sales agent.** Qualification uses a deterministic baseline; optional LLM judgments are bounded. No sending, CRM, real sales results or operational customer metrics.
 
 ## Recruiter-ready summary
 
-> Built **AgentQual**, an independent FastAPI/LangGraph workflow demonstration featuring deterministic and optional model-assisted lead qualification, bounded tool calling, PostgreSQL-backed human approval, tenant-aware access controls and idempotent approval handling. Verified with 82 automated tests, real Docker Compose restart/recovery probes and a genuine Chromium user-flow recording. Evaluations use fictional data and do not establish real-provider performance or production operation.
+> Built **AgentQual**, an independent FastAPI/LangGraph workflow demonstration featuring deterministic and optional model-assisted lead qualification, bounded tool calling, PostgreSQL-backed human approval, tenant-aware access controls and idempotent approval handling. Verified with 102 automated tests, real Docker Compose restart/recovery probes, a genuine Chromium user-flow recording and three schema-valid Gemini drafts from live synthetic requests. This does not establish independent model factuality or production operation.
 
 **What should *not* be claimed:** client deployment; years of commercial multi-agent ownership; revenue uplift; real-world 87.5% predictive accuracy; cloud SLOs; live-model accuracy; fully autonomous agents.
