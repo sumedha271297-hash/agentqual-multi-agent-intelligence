@@ -32,6 +32,8 @@ def evaluate_live(ids, provider='openai'):
             # No automatic approval; text deliberately NOT saved in public report.
             schema_valid = bool(draft.get("subject") and draft.get("message") and
                                 draft.get("requires_approval") and not draft.get("sent"))
+            if not schema_valid:
+                status = "invalid_schema"
         except Exception as exc:
             schema_valid = False
             status = "failed"
@@ -68,3 +70,5 @@ if __name__ == "__main__":
     destination=ROOT/"reports/live_provider_evaluation.json"
     destination.write_text(json.dumps(output,indent=2)+"\n")
     print(json.dumps(output,indent=2))
+    if output["metrics"]["successful_schema_outputs"] != output["metrics"]["total"]:
+        raise SystemExit("Live-provider evaluation did not pass: see redacted report")

@@ -16,3 +16,10 @@ def test_provider_error_captured_not_faked(monkeypatch):
     result=evaluate_live(["c01"])
     assert result["metrics"]["schema_success_rate"]==0
     assert result["rows"][0]["error_type"]=="TimeoutError"
+
+def test_invalid_schema_is_not_counted_as_success(monkeypatch):
+    monkeypatch.setattr("scripts.evaluate_live.generate_llm_draft",
+                        lambda _: {"subject":"", "message":"", "requires_approval":False,"sent":False})
+    result=evaluate_live(["c01"])
+    assert result["metrics"]["successful_schema_outputs"]==0
+    assert result["rows"][0]["status"]=="invalid_schema"
