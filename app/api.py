@@ -5,11 +5,12 @@ import time
 import logging
 from typing import Literal
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, Header
 from pydantic import BaseModel, Field, model_validator
 from app.core import workflow_offline, load_companies
 from app.security import principal, require_owner, validate_security_config
 from app.observability import record, summary
+from app.approval_lock import approval_lock, ApprovalBusy
 
 logger = logging.getLogger("agentqual.requests")
 
@@ -77,6 +78,7 @@ class RunRequest(BaseModel):
     icp: ICP
     llm_enabled: bool = False
     llm_provider: Literal['openai', 'gemini'] = 'openai'
+    agentic_research: bool = False
 
 class ApprovalRequest(BaseModel):
     approved: bool
@@ -111,6 +113,8 @@ def graph_run(request: RunRequest, tenant_id: str = Depends(principal)):
     graph = active_graph()
     if request.company_id not in load_companies():
         raise HTTPException(404, "Unknown company")
+    if request.agentic_research and not os.getenv('OPENAI_API_KEY'):
+        raise HTTPException(422, 'OPENAI_API_KEY required for agentic research')
     if request.llm_enabled:
         required = "GEMINI_API_KEY" if request.llm_provider == "gemini" else "OPENAI_API_KEY"
         if not os.getenv(required):
@@ -121,6 +125,7 @@ def graph_run(request: RunRequest, tenant_id: str = Depends(principal)):
                           "tenant_id": tenant_id,
                           "icp": request.icp.model_dump(),
                           "llm_enabled": request.llm_enabled,
+                          "agentic_research": request.agentic_research,
                           "llm_provider": request.llm_provider,
                           "approved": False, "sent": False}, config=config)
     snapshot = graph.get_state(config)
@@ -137,12 +142,30 @@ def graph_state(thread_id: uuid.UUID, tenant_id: str = Depends(principal)):
 
 @app.post("/graph/{thread_id}/approve")
 def graph_approve(thread_id: uuid.UUID, request: ApprovalRequest,
-                  tenant_id: str = Depends(principal)):
+                  tenant_id: str = Depends(principal),
+                  idempotency_key: uuid.UUID | None = Header(default=None, alias="Idempotency-Key")):
+    """Serializes approval and resumes graph once.
+
+    Retrying with the same idempotency key and same decision returns the
+    durable result instead of re-running. Other completed requests get 409.
+    """
     graph = active_graph()
     config = {"configurable": {"thread_id": str(thread_id)}}
-    snapshot = graph.get_state(config)
-    require_owner(snapshot, tenant_id)
-    if not snapshot.interrupts:
-        raise HTTPException(409, "Thread is not awaiting approval")
-    state = graph.invoke(Command(resume=request.approved), config=config)
-    return {"thread_id": str(thread_id), "state": state, "sent": False}
+    try:
+        with approval_lock(str(thread_id)):
+            snapshot = graph.get_state(config)
+            require_owner(snapshot, tenant_id)
+            if not snapshot.interrupts:
+                state = snapshot.values
+                if (idempotency_key and state.get("approval_request_id") == str(idempotency_key)
+                        and state.get("approved") is request.approved):
+                    return {"thread_id": str(thread_id), "state": state,
+                            "sent": False, "replayed": True}
+                raise HTTPException(409, "Thread is not awaiting approval")
+            decision = {"approved": request.approved,
+                        "request_id": str(idempotency_key) if idempotency_key else None}
+            state = graph.invoke(Command(resume=decision), config=config)
+            return {"thread_id": str(thread_id), "state": state,
+                    "sent": False, "replayed": False}
+    except ApprovalBusy as exc:
+        raise HTTPException(409, "Approval is already in progress") from exc
