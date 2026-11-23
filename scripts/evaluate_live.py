@@ -15,6 +15,25 @@ from app.llm import generate_llm_draft
 
 ROOT = Path(__file__).resolve().parent.parent
 
+# Do not publish raw exception messages, URLs, requests, secrets, or draft text.
+ALLOWED_PROVIDER_STATUSES = {"INVALID_ARGUMENT", "RESOURCE_EXHAUSTED",
+    "PERMISSION_DENIED", "UNAUTHENTICATED", "NOT_FOUND", "FAILED_PRECONDITION",
+    "UNAVAILABLE", "DEADLINE_EXCEEDED", "INTERNAL"}
+
+def safe_provider_diagnostic(exc):
+    raw_code = getattr(exc, "code", None)
+    try:
+        code = int(raw_code)
+    except (ValueError, TypeError, OverflowError):
+        code = None
+    if code is not None and not (400 <= code <= 599):
+        code = None
+    status = getattr(exc, "status", None)
+    if not isinstance(status, str) or status not in ALLOWED_PROVIDER_STATUSES:
+        status = None
+    return {"http_status": code, "provider_status": status}
+
+
 def evaluate_live(ids, provider='openai'):
     data = load_companies()
     results = []
@@ -29,6 +48,7 @@ def evaluate_live(ids, provider='openai'):
                 draft = generate_llm_draft(vars(company))
             status = "schema_valid"
             error_type = None
+            diagnostic = {"http_status": None, "provider_status": None}
             # No automatic approval; text deliberately NOT saved in public report.
             schema_valid = bool(draft.get("subject") and draft.get("message") and
                                 draft.get("requires_approval") and not draft.get("sent"))
@@ -38,9 +58,10 @@ def evaluate_live(ids, provider='openai'):
             schema_valid = False
             status = "failed"
             error_type = type(exc).__name__
+            diagnostic = safe_provider_diagnostic(exc)
         results.append({"company_id":cid,"status":status,"schema_valid":schema_valid,
                         "latency_ms":round((time.perf_counter()-started)*1000,1),
-                        "error_type":error_type})
+                        "error_type":error_type, **diagnostic})
     metrics = {"total": len(results), "successful_schema_outputs":
                sum(x["schema_valid"] for x in results),
                "schema_success_rate": sum(x["schema_valid"] for x in results)/len(results),
