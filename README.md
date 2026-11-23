@@ -16,6 +16,16 @@ AgentQual is an intentionally bounded AI workflow showing how to build and test 
 
 These graph stages are **not autonomous LLM agents**: only the outreach stage optionally calls an LLM, and all input data are synthetic.
 
+## Advanced reliability and agentic research (experimental)
+
+- `app/approval_lock.py`: serializes human approval by thread using PostgreSQL session advisory locks (in-memory stripes in local-only mode). Correctness relies on all writers using the same protocol.
+- `Idempotency-Key: <uuid>` on POST `/graph/{thread_id}/approve` supports safe replay of the **same decision** after a successful checkpoint commit; conflicting keys/decisions return 409.
+- Optional `"agentic_research": true` on POST `/graph/run` enables model-directed tool selection using an OpenAI model and `OPENAI_API_KEY`. The only executable tool is `company_lookup`; calls are validated and bound to the authorized company ID. This costs API credits and is **off by default**.
+- The qualification stage remains rule-based. These are bounded, role-specific workflow stages, **not** a fully autonomous multi-agent team.
+- Tests cover concurrent retry safety, conflicting approvals, invalid tool calls, and cross-record tool access. CI runs without provider charges.
+
+Architecture decisions: [approval locking](docs/adr/0001-approval-serialization.md) and [bounded model tool calls](docs/adr/0002-bounded-model-tool-calls.md).
+
 ## Running locally
 
 ```bash
