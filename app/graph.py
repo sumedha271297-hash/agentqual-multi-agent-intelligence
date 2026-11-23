@@ -7,6 +7,8 @@ from app.tools import company_lookup, ToolFailure
 
 class AgentState(TypedDict, total=False):
     company_id: str
+    agentic_research: bool
+    approval_request_id: Optional[str]
     tenant_id: str
     icp: dict
     llm_enabled: bool
@@ -22,10 +24,14 @@ class AgentState(TypedDict, total=False):
 
 def research_agent(state: AgentState):
     try:
-        result = company_lookup(state["company_id"])
+        if state.get("agentic_research", False):
+            from app.agentic import model_research
+            result = model_research(state["company_id"])
+        else:
+            result = company_lookup(state["company_id"])
         return {"evidence": result["data"], "tool_metadata": result["metadata"],
                 "route": "researched", "sent": False}
-    except (KeyError, ToolFailure) as exc:
+    except (KeyError, ToolFailure, ValueError, RuntimeError, TimeoutError, ConnectionError) as exc:
         return {"route": "failed", "error": type(exc).__name__, "sent": False}
 
 def route_research(state: AgentState):
@@ -66,8 +72,10 @@ def route_outreach(state: AgentState):
 def approval_gate(state: AgentState):
     response = interrupt({"company_id": state["company_id"], "draft": state["draft"],
                           "question": "Approve this draft for manual use? No message is sent."})
-    return {"approved": response is True, "sent": False,
-            "route": "approved" if response is True else "rejected_by_reviewer"}
+    approved = response.get("approved") is True if isinstance(response, dict) else response is True
+    request_id = response.get("request_id") if isinstance(response, dict) else None
+    return {"approved": approved, "approval_request_id": request_id, "sent": False,
+            "route": "approved" if approved else "rejected_by_reviewer"}
 
 def build_graph(checkpointer=None):
     builder = StateGraph(AgentState)
