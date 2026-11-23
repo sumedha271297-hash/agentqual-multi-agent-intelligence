@@ -40,27 +40,41 @@ def evaluate_live(ids, provider='openai'):
     for cid in ids:
         company = data[cid]
         started = time.perf_counter()
-        try:
-            if provider == "gemini":
-                from app.gemini import generate_gemini_draft
-                draft = generate_gemini_draft(vars(company))
-            else:
-                draft = generate_llm_draft(vars(company))
-            status = "schema_valid"
-            error_type = None
-            diagnostic = {"http_status": None, "provider_status": None}
-            # No automatic approval; text deliberately NOT saved in public report.
-            schema_valid = bool(draft.get("subject") and draft.get("message") and
-                                draft.get("requires_approval") and not draft.get("sent"))
-            if not schema_valid:
-                status = "invalid_schema"
-        except Exception as exc:
-            schema_valid = False
-            status = "failed"
-            error_type = type(exc).__name__
-            diagnostic = safe_provider_diagnostic(exc)
+        # One bounded retry is allowed only for Gemini HTTP 503, with a short
+        # pause. Do not retry 400/401/403/404/429 or invalid schema results.
+        # Provider SDK may perform its own retries; this is an extra upper bound.
+        attempts = 0
+        recovered_503 = False
+        while True:
+            attempts += 1
+            try:
+                if provider == "gemini":
+                    from app.gemini import generate_gemini_draft
+                    draft = generate_gemini_draft(vars(company))
+                else:
+                    draft = generate_llm_draft(vars(company))
+                status = "schema_valid"
+                error_type = None
+                diagnostic = {"http_status": None, "provider_status": None}
+                schema_valid = bool(draft.get("subject") and draft.get("message") and
+                                    draft.get("requires_approval") and not draft.get("sent"))
+                if not schema_valid:
+                    status = "invalid_schema"
+                break
+            except Exception as exc:
+                schema_valid = False
+                status = "failed"
+                error_type = type(exc).__name__
+                diagnostic = safe_provider_diagnostic(exc)
+                if (provider == "gemini" and diagnostic["http_status"] == 503
+                        and attempts == 1):
+                    recovered_503 = True
+                    time.sleep(2.0)
+                    continue
+                break
         results.append({"company_id":cid,"status":status,"schema_valid":schema_valid,
                         "latency_ms":round((time.perf_counter()-started)*1000,1),
+                        "attempts":attempts, "retried_after_503":recovered_503,
                         "error_type":error_type, **diagnostic})
     metrics = {"total": len(results), "successful_schema_outputs":
                sum(x["schema_valid"] for x in results),

@@ -47,3 +47,59 @@ def test_untrusted_provider_diagnostics_are_not_recorded(monkeypatch):
     row=evaluate_live(["c01"])["rows"][0]
     assert row["http_status"] is None
     assert row["provider_status"] is None
+
+def test_gemini_503_retries_once_then_succeeds(monkeypatch):
+    from unittest.mock import patch
+    class TemporaryServerError(Exception):
+        code=503
+        status="UNAVAILABLE"
+    count={"n":0}
+    def flaky(_):
+        count["n"]+=1
+        if count["n"]==1:
+            raise TemporaryServerError("provider overloaded")
+        return {"subject":"Valid subject","message":"This message is long enough.",
+                "requires_approval":True,"sent":False}
+    monkeypatch.setattr("app.gemini.generate_gemini_draft",flaky)
+    with patch("scripts.evaluate_live.time.sleep") as pause:
+        result=evaluate_live(["c01"],provider="gemini")
+    assert count["n"]==2
+    assert result["rows"][0]["schema_valid"] is True
+    assert result["rows"][0]["attempts"]==2
+    assert result["rows"][0]["retried_after_503"] is True
+    pause.assert_called_once_with(2.0)
+
+def test_gemini_503_max_two_attempts_and_preserves_error(monkeypatch):
+    from unittest.mock import patch
+    class TemporaryServerError(Exception):
+        code=503
+        status="UNAVAILABLE"
+    calls=[]
+    def unavailable(_):
+        calls.append(1)
+        raise TemporaryServerError("private data")
+    monkeypatch.setattr("app.gemini.generate_gemini_draft",unavailable)
+    with patch("scripts.evaluate_live.time.sleep"):
+        result=evaluate_live(["c01"],provider="gemini")
+    row=result["rows"][0]
+    assert len(calls)==2
+    assert row["http_status"]==503
+    assert row["attempts"]==2
+    assert row["schema_valid"] is False
+    assert "private data" not in str(result)
+
+def test_gemini_does_not_retry_non_transient_errors(monkeypatch):
+    from unittest.mock import patch
+    class BadRequest(Exception):
+        code=404
+        status="NOT_FOUND"
+    calls=[]
+    def not_found(_):
+        calls.append(1)
+        raise BadRequest("model unavailable")
+    monkeypatch.setattr("app.gemini.generate_gemini_draft",not_found)
+    with patch("scripts.evaluate_live.time.sleep") as pause:
+        result=evaluate_live(["c01"],provider="gemini")
+    assert len(calls)==1
+    assert result["rows"][0]["attempts"]==1
+    pause.assert_not_called()
