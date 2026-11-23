@@ -2,10 +2,6 @@ name: Manual Gemini Factuality and Injection Triage
 
 # Explicit opt-in on fictional synthetic inputs only. NOT automatic on push.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'evidence/ONE_TIME_FACTUALITY_20261124.txt'
   workflow_dispatch:
     inputs:
       confirmation:
@@ -30,7 +26,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   gemini-synthetic-factuality:
-    if: ${{ github.event_name == 'push' || inputs.confirmation == 'RUN_FACTUALITY_FREE' }}
+    if: ${{ inputs.confirmation == 'RUN_FACTUALITY_FREE' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -51,7 +47,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements-dev.txt
       - name: Evaluate only explicit fictional scenarios
-        run: python -m scripts.evaluate_factuality --allow-provider-calls --max-cases "${{ github.event_name == 'push' && '4' || inputs.cases }}"
+        run: python -m scripts.evaluate_factuality --allow-provider-calls --max-cases "${{ inputs.cases }}"
       - name: Upload audit report AND synthetic-only human-review packet
         if: always()
         uses: actions/upload-artifact@v4
