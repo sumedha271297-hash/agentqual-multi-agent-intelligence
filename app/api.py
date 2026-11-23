@@ -32,7 +32,13 @@ async def lifespan(app: FastAPI):
             saver.setup()
             app.state.graph = build_graph(saver)
             app.state.persistence = "postgres"
-            yield
+            try:
+                yield
+            finally:
+                # Prevent stale graph references to a closed DB connection
+                # when multiple lifespan contexts run in one process.
+                app.state.graph = _development_graph
+                app.state.persistence = "memory" if _development_graph else "unavailable"
     else:
         app.state.graph = _development_graph
         app.state.persistence = "memory" if _development_graph else "unavailable"
