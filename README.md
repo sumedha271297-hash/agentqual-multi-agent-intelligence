@@ -1,63 +1,73 @@
-# AgentQual — LangGraph Lead Intelligence Workflow
+# AgentQual — Stateful Lead Qualification with LangGraph
 
-**Independent candidate portfolio demonstration | not a historical client deliverable**
+**Independent engineering portfolio demonstration. Not historical client software or a deployed production system.**
 
-A Python/FastAPI application demonstrating explicit graph orchestration, stateful routing, a local company lookup tool, transparent ICP qualification, grounded outreach drafting, and resumable human review. **The current system uses deterministic logic and synthetic data, not LLM calls.** Its LangGraph nodes are specialized workflow stages, not autonomous LLM agents.
+AgentQual is an intentionally bounded AI workflow showing how to build and test auditable qualification decisions, tool execution, checkpointed human approval, and optional provider-backed drafting.
 
-## Quick start
+## What is implemented
+
+- **LangGraph**: research → ICP qualification → conditional routing → outreach draft → human approval interrupt.
+- **Local research tool**: synthetic company lookup with bounded retry, typed record validation, and fail-closed routing.
+- **Two execution modes**: deterministic offline baseline (no key required); optional OpenAI-backed structured draft generation with `OPENAI_API_KEY` and `llm_enabled: true`.
+- **Persistent state**: `PostgresSaver` with `DATABASE_URL`; in-memory saver for local development only.
+- **REST API**: FastAPI run, inspect checkpoint, and approve/reject; no outbound email capability.
+- **Tests**: unit, API, mocked LLM, LangGraph interrupt/resume, and PostgreSQL saver reopening.
+- **Evaluations**: a deliberately rule-aligned synthetic baseline and a synthetic review-rubric disagreement dataset. Neither reflects production quality.
+
+These graph stages are **not autonomous LLM agents**: only the outreach stage optionally calls an LLM, and all input data are synthetic.
+
+## Running locally
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
-pytest -q
+python -m pytest -q
 python -m scripts.evaluate
+python -m scripts.evaluate_rubric
 uvicorn app.api:app --reload
 ```
 
-Open http://127.0.0.1:8000/docs for API documentation.
+The API docs are at http://127.0.0.1:8000/docs. Example request to `POST /graph/run`:
 
-## Offline baseline
-
-```bash
-curl -X POST http://127.0.0.1:8000/offline/run -H 'Content-Type: application/json' -d '{"company_id":"c01","icp":{"industries":["SaaS","Fintech"],"min_employees":20,"max_employees":300,"regions":["US"]}}'
+```json
+{
+  "company_id": "c01",
+  "icp": {
+    "industries": ["SaaS", "Fintech"],
+    "min_employees": 20,
+    "max_employees": 300,
+    "regions": ["US"]
+  },
+  "llm_enabled": false
+}
 ```
 
-## Graph + approval
+Qualified leads pause for review and return a `thread_id`. Then send `{"approved":true}` or `{"approved":false}` to `POST /graph/{thread_id}/approve`. The graph will never automatically send messages.
 
-POST the same JSON to `/graph/run`. A qualified company pauses at the review interrupt. Then POST `{"approved":true}` to `/graph/THREAD_ID/approve`. No messages are sent: human approval only releases a draft for manual use.
+For a local PostgreSQL-backed API:
+
+```bash
+cp .env.example .env
+docker compose --env-file .env up --build
+```
+
+**Do not expose this demo publicly.** Its API is unauthenticated and lacks tenant isolation and thread authorization. PostgreSQL persistence is a demonstrated architecture and must be verified by CI before claiming a successful tested integration.
 
 ## Evaluation
 
-`python -m scripts.evaluate` creates `reports/evaluation.json`. The ten synthetic examples have intentionally rule-aligned labels. Perfect accuracy is **not** evidence of model generalization. No LLM quality or external provider success metrics are claimed.
+`python -m scripts.evaluate` is a basic self-consistency check over ten synthetic records with rules-aligned outcomes; do **not** present its perfect score as a measured model achievement.
 
-## Docker
+`python -m scripts.evaluate_rubric` compares the same rule decisions against a synthetic analyst-style rubric with one deliberate contextual disagreement. Expected metrics are 0.75 precision, 1.00 recall, and approximately 0.857 F1, strictly on this illustrative toy dataset. The contextual label is not a real analyst annotation.
 
-```bash
-docker build -t agentqual .
-docker run --rm -p 8000:8000 agentqual
-```
+See [evaluation methodology](docs/evaluation_methodology.md) and [operations and limitations](docs/operations.md).
 
-Cloud deployment has not been performed. Checkpoints are in-memory and API endpoints are unauthenticated; never expose them publicly without security controls.
+## Candidate portfolio evidence
 
-## Contents
+- [Architecture and trust boundaries](docs/architecture.md)
+- [Review-rubric evaluation methodology](docs/evaluation_methodology.md)
+- [Operational and deployment limits](docs/operations.md)
+- [GitHub Actions workflow](.github/workflows/ci.yml)
+- [Demo recording outline](docs/demo_script.md)
 
-- `app/core.py`: rule-based qualification baseline and grounded recommendation generation
-- `app/tools.py`: bounded local lookup tool with retries and validation
-- `app/graph.py`: LangGraph StateGraph, conditional routing, interrupt
-- `app/api.py`: FastAPI run/resume endpoints
-- `data/`: synthetic company fixtures and labels
-- `scripts/evaluate.py`: reproducible baseline metrics
-- `tests/`: deterministic, edge, tool, API tests
-- `docs/`: architecture, demo plan, readiness assessment
-- `.github/workflows/ci.yml`: unit tests and evaluation in CI
-
-## Remaining engineering gates
-
-1. Verify LangGraph run/pause/resume in GitHub CI with real integration tests.
-2. Add permissioned research API and an optional LLM adapter with structured outputs.
-3. Create a truly independently labeled evaluation dataset.
-4. Use persistent Postgres checkpoints and add authentication and instrumentation.
-5. Stage, load-test, deploy and record a reproducible demonstration video.
-
-**Integrity note:** This is candidate project work, not client-delivered software or an operated production service. Do not describe its deterministic graph stages as autonomous LLM agents.
+The realistic next steps are permissioned research API integration, measured LLM factuality, independently annotated holdout data, authentication and authorization, distributed observability, cloud deployment, and a recorded demonstration. No such results are claimed here.
