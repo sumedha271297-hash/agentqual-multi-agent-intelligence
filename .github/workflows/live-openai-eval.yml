@@ -1,0 +1,60 @@
+name: Manual Live OpenAI Evaluation
+
+# Never runs on push or pull_request. Real API calls may incur charges.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type RUN_LIVE_EVAL to authorize up to 3 live API calls'
+        required: true
+        type: string
+      cases:
+        description: 'Number of synthetic test companies (1 to 3)'
+        required: true
+        default: '1'
+        type: choice
+        options:
+          - '1'
+          - '2'
+          - '3'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agentqual-live-evaluation
+  cancel-in-progress: false
+
+jobs:
+  live-openai-evaluation:
+    if: ${{ inputs.confirmation == 'RUN_LIVE_EVAL' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-4.1-mini
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Check API secret is configured
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::OPENAI_API_KEY is not configured in repository Actions secrets."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Perform explicitly approved provider evaluation
+        run: python -m scripts.evaluate_live --provider openai --allow-provider-calls --max-cases "${{ inputs.cases }}"
+      - name: Upload redacted numeric report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentqual-live-evaluation
+          path: reports/live_provider_evaluation.json
+          if-no-files-found: ignore
+          retention-days: 7
