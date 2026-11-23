@@ -7,6 +7,7 @@ from app.tools import company_lookup, ToolFailure
 
 class AgentState(TypedDict, total=False):
     company_id: str
+    tenant_id: str
     icp: dict
     llm_enabled: bool
     evidence: dict
