@@ -1,0 +1,95 @@
+name: Verified Staging and Browser Walkthrough
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'data/**'
+      - 'deploy/**'
+      - 'Dockerfile'
+      - 'requirements*.txt'
+      - 'scripts/staging_probe.py'
+      - 'scripts/staging_recovery.py'
+      - 'scripts/record_browser.py'
+      - '.github/workflows/staging-demo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  container-staging:
+    name: Real Docker Compose staging and auth probes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Ephemeral CI-only fake credentials; never use in any public deployment.
+      POSTGRES_PASSWORD: test_only_staging_9e4ee1
+      AGENTQUAL_TENANT_TOKENS: '{"tenant-a":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","tenant-b":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}'
+      STAGING_BASE_URL: http://127.0.0.1:8080
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Build and boot actual production-mode containers
+        run: docker compose -f deploy/staging.compose.yml up -d --build --wait
+      - name: Auth, tenancy and approval probes over real HTTP
+        run: python -m scripts.staging_probe
+      - name: Persist a pending human approval
+        run: python -m scripts.staging_recovery prepare
+      - name: Restart actual API container, preserving PostgreSQL
+        run: docker compose -f deploy/staging.compose.yml restart api
+      - name: Verify checkpoint after process restart
+        run: python -m scripts.staging_recovery resume
+      - name: Capture container logs for failed jobs
+        if: failure()
+        run: docker compose -f deploy/staging.compose.yml logs --tail=100
+      - name: Tear down all test containers and volumes
+        if: always()
+        run: docker compose -f deploy/staging.compose.yml down -v --remove-orphans
+
+  recorded-browser-demo:
+    name: Genuine Chromium screen recording
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install app and real browser automation
+        run: |
+          pip install -r requirements-dev.txt playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Start real FastAPI server on loopback
+        run: |
+          APP_ENV=development python -m uvicorn app.api:app --host 127.0.0.1 --port 8000 > /tmp/agentqual-browser-server.log 2>&1 &
+          echo $! > /tmp/agentqual-browser-server.pid
+          python - <<'PY'
+          import time,urllib.request
+          for i in range(50):
+              try:
+                  if urllib.request.urlopen("http://127.0.0.1:8000/health",timeout=1).status==200: break
+              except Exception: time.sleep(.2)
+          else: raise RuntimeError("Local FastAPI did not start")
+          PY
+      - name: Record real user interactions and verify assertions
+        run: python -m scripts.record_browser
+      - name: Convert actual browser video to MP4
+        run: |
+          mkdir -p reports/browser
+          VIDEO=$(find reports/browser -type f -name '*.webm' | head -n 1)
+          test -n "$VIDEO"
+          ffmpeg -y -i "$VIDEO" -c:v libx264 -pix_fmt yuv420p -movflags +faststart reports/browser/agentqual_real_browser_demo.mp4
+          test -s reports/browser/agentqual_real_browser_demo.mp4
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: agentqual-genuine-browser-recording
+          path: reports/browser/
+          retention-days: 30
+      - name: Print server logs on failure
+        if: failure()
+        run: cat /tmp/agentqual-browser-server.log || true
