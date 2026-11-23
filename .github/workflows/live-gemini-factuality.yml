@@ -1,0 +1,60 @@
+name: Manual Gemini Factuality and Injection Triage
+
+# Explicit opt-in on fictional synthetic inputs only. NOT automatic on push.
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type RUN_FACTUALITY_FREE after verifying your AI Studio project remains Free tier'
+        required: true
+        type: string
+      cases:
+        description: 'How many fictional cases? First 2 are clean, 3rd is a prompt-injection case'
+        required: true
+        default: '3'
+        type: choice
+        options:
+          - '1'
+          - '2'
+          - '3'
+          - '4'
+          - '5'
+permissions:
+  contents: read
+concurrency:
+  group: agentqual-factuality-real-gemini
+  cancel-in-progress: false
+jobs:
+  gemini-synthetic-factuality:
+    if: ${{ inputs.confirmation == 'RUN_FACTUALITY_FREE' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: gemini-3.5-flash-lite
+    steps:
+      - name: Require existing Gemini secret
+        shell: bash
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::Add GEMINI_API_KEY to Actions secrets first"
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - name: Evaluate only explicit fictional scenarios
+        run: python -m scripts.evaluate_factuality --allow-provider-calls --max-cases "${{ inputs.cases }}"
+      - name: Upload audit report AND synthetic-only human-review packet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gemini-synthetic-factuality-evidence
+          path: |
+            reports/gemini_factuality_report.json
+            reports/gemini_synthetic_review_packet.json
+          if-no-files-found: ignore
+          retention-days: 7
