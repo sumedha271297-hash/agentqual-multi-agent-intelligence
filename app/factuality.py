@@ -10,7 +10,7 @@ EMPLOYEE_PATTERN = re.compile(r"(?<!\w)(\d[\d,]{0,8})\s+(?:employees|staff|team 
 # synthetic records. This intentionally errs on the side of flagging.
 FINANCIAL_PATTERNS = {
     "unsupported_funding_or_financial_claim": re.compile(
-        r"\b(?:funding|funded|raised\s+\$|revenue|annual recurring revenue|\bARR\b|valuation|valued at|series [a-f]\b)\b",
+        r"\b(?:funding|funded|revenue|annual recurring revenue|ARR|valuation|valued at|series [a-f])\b|\braised\s+\$",
         re.IGNORECASE),
 }
 EXTRA_CLAIM_PATTERN = re.compile(
