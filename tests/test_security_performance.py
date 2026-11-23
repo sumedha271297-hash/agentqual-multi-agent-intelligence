@@ -21,7 +21,7 @@ def test_local_reviewer_shell_not_exposed_in_production(monkeypatch):
     monkeypatch.setenv("APP_ENV","production")
     client=TestClient(app,raise_server_exceptions=False)
     response=client.get("/demo")
-        assert response.status_code==404
+    assert response.status_code==404
 
 def test_reviewer_shell_has_security_headers(monkeypatch):
     monkeypatch.setenv("APP_ENV","development")
