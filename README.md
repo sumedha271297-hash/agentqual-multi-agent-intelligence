@@ -14,6 +14,8 @@ Latest confirmed baseline (commit `3aae87c1`): **82 tests passed** in [Python CI
 
 ## Final candidate validation gates (2026-11-24)
 
+**Latest verified outcome:** 88 passing tests and a [successful production-mode localhost TLS/rate-limit/PostgreSQL backup-and-restore rehearsal](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45248497792). [Evidence status and explicit gaps](docs/FINAL_EVIDENCE_STATUS.md).
+
 - [Blinded independent-review packet and adjudication protocol](docs/INDEPENDENT_REVIEW_PROTOCOL.md). Code checks format and distinct reviewers; **no actual outside reviewer labels have been supplied or claimed**.
 - [Production-style localhost TLS, ingress rate limit and real Postgres backup/restore drills](docs/PRODUCTION_REHEARSAL.md). CI uses disposable secrets and a self-signed localhost certificate, not an actual private cloud.
 - [Unscored, hands-on technical interview assessment](docs/TECHNICAL_ASSESSMENT.md) with `python -m scripts.practice_defense`; the candidate must personally submit answers before anyone can claim the practice was completed.
