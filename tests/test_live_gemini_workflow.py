@@ -8,7 +8,9 @@ def test_free_gemini_workflow_is_manual_opt_in():
     assert "workflow_dispatch:" in workflow
     assert "RUN_GEMINI_FREE" in workflow
     assert "secrets.GEMINI_API_KEY" in workflow
-    assert "gemini-2.5-flash-lite" in workflow
+    assert "gemini-3.5-flash-lite" in workflow
+    assert "gemini-3.1-flash-lite" in workflow
+    assert "inputs.model" in workflow
     assert "--provider gemini --allow-provider-calls" in workflow
     assert "push:" not in workflow.split("jobs:",1)[0]
     assert "pull_request:" not in workflow.split("jobs:",1)[0]

@@ -10,6 +10,14 @@ on:
         description: 'Type RUN_GEMINI_FREE to confirm your Google AI Studio project is on the Free tier'
         required: true
         type: string
+      model:
+        description: 'Choose a Google AI Studio free-tier model. Availability varies by project.'
+        required: true
+        default: 'gemini-3.5-flash-lite'
+        type: choice
+        options:
+          - 'gemini-3.5-flash-lite'
+          - 'gemini-3.1-flash-lite'
       cases:
         description: 'Synthetic companies to check (start with 1)'
         required: true
@@ -34,7 +42,7 @@ jobs:
     timeout-minutes: 10
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      GEMINI_MODEL: gemini-2.5-flash-lite
+      GEMINI_MODEL: ${{ inputs.model }}
       PYTHONUNBUFFERED: '1'
     steps:
       - name: Confirm Gemini credential is present without printing it

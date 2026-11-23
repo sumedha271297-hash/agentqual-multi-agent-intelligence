@@ -67,7 +67,7 @@ def evaluate_live(ids, provider='openai'):
                "schema_success_rate": sum(x["schema_valid"] for x in results)/len(results),
                "median_latency_ms": round(statistics.median(x["latency_ms"] for x in results),1),
                "provider": provider,
-               "provider_model": (os.environ.get("GEMINI_MODEL","gemini-2.5-flash-lite") if provider == "gemini" else os.environ.get("OPENAI_MODEL","gpt-4.1-mini")),
+               "provider_model": (os.environ.get("GEMINI_MODEL","gemini-3.5-flash-lite") if provider == "gemini" else os.environ.get("OPENAI_MODEL","gpt-4.1-mini")),
                "limitations": "Synthetic data, small sample, schema only; no factuality, token-cost or qualitative accuracy measured."}
     return {"evaluation_type":"LIVE_PROVIDER_SCHEMAS_ONLY","metrics":metrics,"rows":results}
 

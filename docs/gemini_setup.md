@@ -22,7 +22,7 @@ and request latency are saved to ignored `reports/live_provider_evaluation.json`
 No generated email text or secrets are persisted in the report. This is not a
 qualification accuracy or factual-grounding evaluation.
 
-Default model: `gemini-2.5-flash-lite` (override with `GEMINI_MODEL` if
+Default model: `gemini-3.5-flash-lite` (override with `GEMINI_MODEL` if
 unavailable). The graph requires `llm_enabled=true` and
 `llm_provider="gemini"`, with tenant API authentication as configured.
 Human approval is still mandatory and messages are **never** sent.
@@ -43,3 +43,17 @@ Existing offline and OpenAI modes remain available.
 **Privacy:** Gemini free-tier inputs and outputs may be used to improve Google's products; this demo uses fictional company fields only. Never use private leads or confidential company information.
 
 **Evidence:** A green run establishes that the real Gemini SDK generated a schema-valid draft and reports latency for the tested fictional input(s). It does **not** establish qualified-lead accuracy, factual grounding, or independent human review.
+
+## 2026-11-24 model migration
+
+The user's free-tier project successfully supplied a GitHub secret, but
+`gemini-2.5-flash-lite` generation returned HTTP **404 NOT_FOUND**.
+Google's 2026 developer guidance says the 2.5 generation endpoint may be
+unavailable for newer users. The *default* is now `gemini-3.5-flash-lite`,
+which Google's pricing documentation lists with free-tier text input/output.
+An additional `gemini-3.1-flash-lite` selection is provided in Actions.
+This is a model-availability diagnosis, **not** evidence of successful
+live inference: only a green provider run establishes that.
+
+The Google project must remain Free tier to avoid charges. Do not repeatedly
+retry a 404 with the same 2.5 model and do not enable billing to fix it.
