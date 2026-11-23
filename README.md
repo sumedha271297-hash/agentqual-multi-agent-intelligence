@@ -26,6 +26,19 @@ These graph stages are **not autonomous LLM agents**: only the outreach stage op
 
 Architecture decisions: [approval locking](docs/adr/0001-approval-serialization.md) and [bounded model tool calls](docs/adr/0002-bounded-model-tool-calls.md).
 
+## Verified 2026-11-23 engineering milestone
+
+GitHub CI (commit `4ac10aa12ff5d03dfb666656ab3fc5ea90426aa2`) passed **75 automated tests** and executed two reproducible evidence programs:
+
+- `python -m scripts.evaluate_v2` measures a **frozen 40-case fictional matrix** with explicit simulated reviewer labels and reports splits and errors. 87.5% overall F1 is a synthetic, rules-based test result, NOT LLM accuracy or independent real-world performance.
+- `python -m scripts.demo` invokes the actual offline LangGraph graph with two fictional profiles. It verifies approval pause/resume and safe rejection. The corresponding report is available as an artifact in the [successful GitHub Actions run](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45236305886).
+
+Optional `agentic_qualification: true` enables schema-constrained model reasoning with QUALIFY, REJECT and REVIEW outcomes. A deterministic ICP policy vetoes unsupported QUALIFY judgments. This feature is tested with mocked model output, not live inference. It requires `OPENAI_API_KEY` when used for real calls.
+
+A localhost-only rehearsal configuration is provided at [deploy/staging.compose.yml](deploy/staging.compose.yml). It is **not a cloud deployment**, is unverified by a container runtime, and is not safe for internet exposure without additional controls.
+
+See [evaluation methodology v2](docs/evaluation_v2.md), [demo instructions](docs/demo.md), [staging plan](docs/staging.md), and [ADR 0003](docs/adr/0003-constrained-qualification-reasoning.md).
+
 ## Running locally
 
 ```bash
