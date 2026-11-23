@@ -12,6 +12,13 @@ AgentQual is an intentionally bounded AI workflow showing how to build and test 
 
 Latest confirmed baseline (commit `3aae87c1`): **82 tests passed** in [Python CI](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45243287837), and [Docker Compose staging plus genuine Chromium browser recording](https://github.com/sumedha271297-hash/agentqual-multi-agent-intelligence/actions/runs/45243288064) passed. Recordings are workflow artifacts. This is **synthetic-data independent portfolio work**, not customer delivery, verified real LLM performance, or a public deployment.
 
+## Final candidate validation gates (2026-11-24)
+
+- [Blinded independent-review packet and adjudication protocol](docs/INDEPENDENT_REVIEW_PROTOCOL.md). Code checks format and distinct reviewers; **no actual outside reviewer labels have been supplied or claimed**.
+- [Production-style localhost TLS, ingress rate limit and real Postgres backup/restore drills](docs/PRODUCTION_REHEARSAL.md). CI uses disposable secrets and a self-signed localhost certificate, not an actual private cloud.
+- [Unscored, hands-on technical interview assessment](docs/TECHNICAL_ASSESSMENT.md) with `python -m scripts.practice_defense`; the candidate must personally submit answers before anyone can claim the practice was completed.
+- Real-model evaluation remains manual, opt-in and credit-dependent. No live API metrics or independent human-label accuracy are claimed.
+
 ## What is implemented
 
 - **LangGraph**: research → ICP qualification → conditional routing → outreach draft → human approval interrupt.

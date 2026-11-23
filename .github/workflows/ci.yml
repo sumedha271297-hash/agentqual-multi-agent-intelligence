@@ -32,6 +32,7 @@ jobs:
       - run: python -m scripts.evaluate
       - run: python -m scripts.evaluate_rubric
       - run: python -m scripts.evaluate_v2
+      - run: python -m scripts.blind_review packet --out reports/annotation_packet
       - run: python -m scripts.demo
       - run: python -m scripts.security_matrix
       - run: python -m scripts.performance_smoke
@@ -42,6 +43,7 @@ jobs:
           path: |
             reports/demo_trace.json
             reports/eval_v2.json
+            reports/annotation_packet/blind_cases.csv
             reports/security_matrix.json
             reports/performance_smoke.json
           retention-days: 14

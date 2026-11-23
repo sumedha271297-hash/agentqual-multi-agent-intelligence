@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 reports/
 *.mp4
+
+# Generated, short-lived TLS keys used only during private staging CI
+deploy/tls/
