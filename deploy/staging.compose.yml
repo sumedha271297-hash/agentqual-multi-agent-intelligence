@@ -1,0 +1,45 @@
+# LOCAL staging rehearsal; no public cloud deployment.
+# docker compose -f deploy/staging.compose.yml --env-file .env up --build
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: agentqual
+      POSTGRES_USER: agentqual
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a PostgreSQL password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentqual -d agentqual"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:8000"
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql://agentqual:${POSTGRES_PASSWORD:?Set a PostgreSQL password}@postgres:5432/agentqual
+      AGENTQUAL_TENANT_TOKENS: ${AGENTQUAL_TENANT_TOKENS:?Configure tenant API tokens}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+networks:
+  internal: {}
+volumes:
+  postgres_data: {}

@@ -8,6 +8,8 @@ from app.tools import company_lookup, ToolFailure
 class AgentState(TypedDict, total=False):
     company_id: str
     agentic_research: bool
+    agentic_qualification: bool
+    reasoning: dict
     approval_request_id: Optional[str]
     tenant_id: str
     icp: dict
@@ -40,6 +42,16 @@ def route_research(state: AgentState):
 def qualification_agent(state: AgentState):
     company = Company(**state["evidence"])
     result = qualify(company, state["icp"])
+    if state.get("agentic_qualification", False):
+        try:
+            from app.reasoning import assess
+            reasoned = assess(company, state["icp"])
+            route = {"QUALIFY": "outreach", "REJECT": "rejected",
+                     "REVIEW": "needs_review"}[reasoned["verdict"]]
+            return {"qualification": result, "reasoning": reasoned, "route": route}
+        except Exception:
+            return {"qualification": result, "reasoning": {"verdict": "REVIEW",
+                    "reason": "Model evaluation failed"}, "route": "needs_review"}
     return {"qualification": result, "route": "outreach" if result["qualified"] else "rejected"}
 
 def route_qualification(state: AgentState):
@@ -87,7 +99,7 @@ def build_graph(checkpointer=None):
     builder.add_conditional_edges("research_agent", route_research,
                                   {"researched": "qualification_agent", "failed": END})
     builder.add_conditional_edges("qualification_agent", route_qualification,
-                                  {"outreach": "outreach_agent", "rejected": END})
+                                  {"outreach": "outreach_agent", "rejected": END, "needs_review": END})
     builder.add_conditional_edges("outreach_agent", route_outreach,
                                   {"approval": "approval_gate", "failed": END})
     builder.add_edge("approval_gate", END)

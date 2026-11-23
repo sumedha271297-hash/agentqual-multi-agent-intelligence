@@ -1,0 +1,370 @@
+{
+  "version": "2.0.0",
+  "label_provenance": "hand-authored synthetic reviewer decisions; NOT independent human annotations",
+  "policies": {
+    "us-b2b": {
+      "industries": [
+        "SaaS",
+        "Fintech"
+      ],
+      "min_employees": 20,
+      "max_employees": 300,
+      "regions": [
+        "US"
+      ]
+    },
+    "uk-saas": {
+      "industries": [
+        "SaaS"
+      ],
+      "min_employees": 20,
+      "max_employees": 300,
+      "regions": [
+        "UK"
+      ]
+    },
+    "retail-north-america": {
+      "industries": [
+        "Retail"
+      ],
+      "min_employees": 1,
+      "max_employees": 500,
+      "regions": [
+        "US",
+        "CA"
+      ]
+    },
+    "us-saas-midmarket": {
+      "industries": [
+        "SaaS"
+      ],
+      "min_employees": 50,
+      "max_employees": 150,
+      "regions": [
+        "US"
+      ]
+    }
+  },
+  "cases": [
+    {
+      "case_id": "us-b2b-c01",
+      "company_id": "c01",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": true,
+      "annotation": "Synthetic reviewer accepts all relevant criteria"
+    },
+    {
+      "case_id": "us-b2b-c02",
+      "company_id": "c02",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-b2b-c03",
+      "company_id": "c03",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-b2b-c04",
+      "company_id": "c04",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": true,
+      "annotation": "Synthetic reviewer accepts all relevant criteria"
+    },
+    {
+      "case_id": "us-b2b-c05",
+      "company_id": "c05",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-b2b-c06",
+      "company_id": "c06",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-b2b-c07",
+      "company_id": "c07",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-b2b-c08",
+      "company_id": "c08",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": true,
+      "annotation": "Synthetic reviewer accepts all relevant criteria"
+    },
+    {
+      "case_id": "us-b2b-c09",
+      "company_id": "c09",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Simulated reviewer exclusion: generic workflow description lacks explicit ICP relevance"
+    },
+    {
+      "case_id": "us-b2b-c10",
+      "company_id": "c10",
+      "icp_id": "us-b2b",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c01",
+      "company_id": "c01",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c02",
+      "company_id": "c02",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c03",
+      "company_id": "c03",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": true,
+      "annotation": "Synthetic reviewer accepts all relevant criteria"
+    },
+    {
+      "case_id": "uk-saas-c04",
+      "company_id": "c04",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c05",
+      "company_id": "c05",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c06",
+      "company_id": "c06",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c07",
+      "company_id": "c07",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c08",
+      "company_id": "c08",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "uk-saas-c09",
+      "company_id": "c09",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Simulated reviewer exclusion: generic workflow description lacks explicit ICP relevance"
+    },
+    {
+      "case_id": "uk-saas-c10",
+      "company_id": "c10",
+      "icp_id": "uk-saas",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c01",
+      "company_id": "c01",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c02",
+      "company_id": "c02",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": true,
+      "annotation": "Synthetic reviewer accepts all relevant criteria"
+    },
+    {
+      "case_id": "retail-north-america-c03",
+      "company_id": "c03",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c04",
+      "company_id": "c04",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c05",
+      "company_id": "c05",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c06",
+      "company_id": "c06",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c07",
+      "company_id": "c07",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c08",
+      "company_id": "c08",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c09",
+      "company_id": "c09",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "retail-north-america-c10",
+      "company_id": "c10",
+      "icp_id": "retail-north-america",
+      "split": "development",
+      "expected_qualified": true,
+      "annotation": "Synthetic reviewer accepts all relevant criteria"
+    },
+    {
+      "case_id": "us-saas-midmarket-c01",
+      "company_id": "c01",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": true,
+      "annotation": "Synthetic reviewer accepts all relevant criteria"
+    },
+    {
+      "case_id": "us-saas-midmarket-c02",
+      "company_id": "c02",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-saas-midmarket-c03",
+      "company_id": "c03",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-saas-midmarket-c04",
+      "company_id": "c04",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-saas-midmarket-c05",
+      "company_id": "c05",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-saas-midmarket-c06",
+      "company_id": "c06",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-saas-midmarket-c07",
+      "company_id": "c07",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-saas-midmarket-c08",
+      "company_id": "c08",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    },
+    {
+      "case_id": "us-saas-midmarket-c09",
+      "company_id": "c09",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Simulated reviewer exclusion: generic workflow description lacks explicit ICP relevance"
+    },
+    {
+      "case_id": "us-saas-midmarket-c10",
+      "company_id": "c10",
+      "icp_id": "us-saas-midmarket",
+      "split": "holdout",
+      "expected_qualified": false,
+      "annotation": "Synthetic reviewer rejects out-of-scope or insufficient-fit company"
+    }
+  ]
+}

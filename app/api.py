@@ -85,6 +85,7 @@ class RunRequest(BaseModel):
     llm_enabled: bool = False
     llm_provider: Literal['openai', 'gemini'] = 'openai'
     agentic_research: bool = False
+    agentic_qualification: bool = False
 
 class ApprovalRequest(BaseModel):
     approved: bool
@@ -119,7 +120,7 @@ def graph_run(request: RunRequest, tenant_id: str = Depends(principal)):
     graph = active_graph()
     if request.company_id not in load_companies():
         raise HTTPException(404, "Unknown company")
-    if request.agentic_research and not os.getenv('OPENAI_API_KEY'):
+    if (request.agentic_research or request.agentic_qualification) and not os.getenv('OPENAI_API_KEY'):
         raise HTTPException(422, 'OPENAI_API_KEY required for agentic research')
     if request.llm_enabled:
         required = "GEMINI_API_KEY" if request.llm_provider == "gemini" else "OPENAI_API_KEY"
@@ -132,6 +133,7 @@ def graph_run(request: RunRequest, tenant_id: str = Depends(principal)):
                           "icp": request.icp.model_dump(),
                           "llm_enabled": request.llm_enabled,
                           "agentic_research": request.agentic_research,
+                          "agentic_qualification": request.agentic_qualification,
                           "llm_provider": request.llm_provider,
                           "approved": False, "sent": False}, config=config)
     snapshot = graph.get_state(config)

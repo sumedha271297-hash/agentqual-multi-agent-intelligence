@@ -31,3 +31,13 @@ jobs:
       - run: python -m pytest -q
       - run: python -m scripts.evaluate
       - run: python -m scripts.evaluate_rubric
+      - run: python -m scripts.evaluate_v2
+      - run: python -m scripts.demo
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: offline-verified-evidence
+          path: |
+            reports/demo_trace.json
+            reports/eval_v2.json
+          retention-days: 14
