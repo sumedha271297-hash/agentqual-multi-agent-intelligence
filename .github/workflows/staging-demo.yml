@@ -61,7 +61,7 @@ jobs:
           cache: pip
       - name: Install app and real browser automation
         run: |
-          pip install -r requirements-dev.txt playwright==1.56.0
+          pip install -r requirements-dev.txt playwright==1.64.1
           python -m playwright install --with-deps chromium
       - name: Start real FastAPI server on loopback
         run: |
